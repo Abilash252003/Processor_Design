@@ -1,0 +1,186 @@
+module tb();
+  IR_ALU dut();
+  
+  integer i;
+  
+  task initialize();
+    for(i=0; i<32; i=i+1)
+      begin
+        dut.GPR[i] = 512;
+        $display("GPR[%d]: %d", i,dut.GPR[i]);
+      end
+  endtask
+  
+  
+  initial 
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+
+  initial
+    begin
+      initialize();
+      #10;
+      
+      ////movsgpr (undefined)
+      dut.IR = 0;
+      dut.`op_code = 0; 
+      dut.`rdst    = 19; ///gpr[19]
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Sgpr:%b",dut.`op_code, dut.GPR[19], dut.sgpr);
+      
+      #10;
+      /////mov instruc with register
+      dut.IR = 0;
+      dut.`op_code = 1; 
+      dut.`rdst    = 1; ///gpr[1]
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b",dut.`op_code, dut.GPR[1], dut.GPR[0]);
+      
+      #10;
+      
+      //// add instruc with register
+      dut.IR = 0;
+      dut.`op_code = 2;
+      dut.`rdst    = 4; //gpr[4]
+      dut.`rsrc1   = 2; //gpr[2]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 3; //gpr[3]
+      dut.`isrc    = 0; //imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[4], dut.GPR[2], dut.GPR[3]);
+      
+      #10;
+      
+      //// add instruc with imm data
+      dut.IR = 0;
+      dut.`op_code = 2;
+      dut.`rdst    = 6; //gpr[6]
+      dut.`rsrc1   = 5; //gpr[5]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; //gpr[0]
+      dut.`isrc    = 20;//imm=20
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[6], dut.GPR[5], dut.`isrc);
+      
+      #10;
+      
+      //// sub instruc with register
+      dut.IR = 0;
+      dut.`op_code = 3;
+      dut.`rdst    = 9; //gpr[9]
+      dut.`rsrc1   = 7; //gpr[7]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 8; //gpr[8]
+      dut.`isrc    = 0; //imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[9], dut.GPR[7], dut.GPR[8]);
+      
+      #10;
+      
+      //// sub instruc with imm data
+      dut.IR = 0;
+      dut.`op_code = 3;
+      dut.`rdst    = 11; //gpr[11]
+      dut.`rsrc1   = 10; //gpr[10]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; //gpr[0]
+      dut.`isrc    = 250;//imm=250
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[11], dut.GPR[10], dut.`isrc);
+      
+      #10;
+      
+      //// mul instruc with register
+      dut.IR = 0;
+      dut.`op_code = 4;
+      dut.`rdst    = 14; //gpr[14]
+      dut.`rsrc1   = 12; //gpr[12]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 13; //gpr[13]
+      dut.`isrc    = 0; //imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[14], dut.GPR[12], dut.GPR[13]);
+      
+      #10;
+      
+      ////movsgpr
+      dut.IR = 0;
+      dut.`op_code = 0; 
+      dut.`rdst    = 15; ///gpr[15]
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Sgpr:%b",dut.`op_code, dut.GPR[15], dut.sgpr);
+      
+      #10;
+      
+      //// mul instruc with imm data
+      dut.IR = 0;
+      dut.`op_code = 4;
+      dut.`rdst    = 17; //gpr[17]
+      dut.`rsrc1   = 16; //gpr[16]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; //gpr[0]
+      dut.`isrc    = 1024;//imm=1024
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[17], dut.GPR[16], dut.`isrc);
+      
+      #10;
+      
+      ////movsgpr
+      dut.IR = 0;
+      dut.`op_code = 0; 
+      dut.`rdst    = 18; ///gpr[18]
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Sgpr:%b",dut.`op_code, dut.GPR[18], dut.sgpr);
+      
+      #10;
+      
+      //// mov instruc with imm data
+      dut.IR = 0;
+      dut.`op_code = 1;
+      dut.`rdst    = 20; //gpr[20]
+      dut.`rsrc1   = 0; //gpr[0]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; //gpr[0]
+      dut.`isrc    = 20;//imm=20
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--imm:%b",dut.`op_code, dut.GPR[20], dut.`isrc);
+      
+      #10;
+      
+      for(i=0; i<32; i=i+1)
+        begin
+          $display("GPR[%d]: %d", i,dut.GPR[i]);
+        end
+    end
+  
+endmodule
+  
