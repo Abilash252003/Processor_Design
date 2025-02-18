@@ -1,0 +1,228 @@
+module tb();
+  Logical_op dut();
+  
+  integer i;
+  
+  task initialize();
+    for(i=0; i<32; i=i+1)
+      begin
+        dut.GPR[i] = 5;
+        $display("GPR[%d]: %d", i,dut.GPR[i]);
+      end
+  endtask
+  
+  
+  initial 
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+
+  initial
+    begin
+      initialize();
+      #10;
+      
+      //// bitwise or with register
+      dut.IR = 0;
+      dut.`op_code = 5; 
+      dut.`rdst    = 2; ///gpr[2]
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 1; ///gpr[1]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[2], dut.GPR[0], dut.GPR[1]);
+      
+      #10;
+      
+      //// bitwise or with imm data
+      dut.IR = 0;
+      dut.`op_code = 5; 
+      dut.`rdst    = 4; ///gpr[4]
+      dut.`rsrc1   = 3; ///gpr[3]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[4], dut.GPR[3],dut.`isrc);
+      
+      #10;
+      
+      //// bitwise and with register
+      dut.IR = 0;
+      dut.`op_code = 6; 
+      dut.`rdst    = 7; ///gpr[7]
+      dut.`rsrc1   = 5; ///gpr[5]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 6; ///gpr[6]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[7], dut.GPR[5], dut.GPR[6]);
+      
+      #10;
+      
+      //// bitwise and with imm data
+      dut.IR = 0;
+      dut.`op_code = 6; 
+      dut.`rdst    = 9; ///gpr[9]
+      dut.`rsrc1   = 8; ///gpr[8]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[9], dut.GPR[8],dut.`isrc);
+      
+      #10;
+     
+      //// bitwise xor with register
+      dut.IR = 0;
+      dut.`op_code = 7; 
+      dut.`rdst    = 12; ///gpr[12]
+      dut.`rsrc1   = 10; ///gpr[10]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 11; ///gpr[11]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[12], dut.GPR[10], dut.GPR[11]);
+      
+      #10;
+      
+      //// bitwise xor with imm data
+      dut.IR = 0;
+      dut.`op_code = 7; 
+      dut.`rdst    = 14; ///gpr[14]
+      dut.`rsrc1   = 13; ///gpr[13]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[14], dut.GPR[13],dut.`isrc);
+      
+      #10;
+      
+      //// bitwise xnor with register
+      dut.IR = 0;
+      dut.`op_code = 8; 
+      dut.`rdst    = 17; ///gpr[17]
+      dut.`rsrc1   = 15; ///gpr[15]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 16; ///gpr[16]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[17], dut.GPR[15], dut.GPR[16]);
+      
+      #10;
+      
+      //// bitwise xnor with imm data
+      dut.IR = 0;
+      dut.`op_code = 8; 
+      dut.`rdst    = 19; ///gpr[19]
+      dut.`rsrc1   = 18; ///gpr[18]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[19], dut.GPR[18],dut.`isrc);
+      
+      #10;      
+     
+      //// bitwise nand with register
+      dut.IR = 0;
+      dut.`op_code = 9; 
+      dut.`rdst    = 22; ///gpr[22]
+      dut.`rsrc1   = 20; ///gpr[20]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 21; ///gpr[21]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[22], dut.GPR[20], dut.GPR[21]);
+      
+      #10;
+      
+      //// bitwise nand with imm data
+      dut.IR = 0;
+      dut.`op_code = 9; 
+      dut.`rdst    = 24; ///gpr[24]
+      dut.`rsrc1   = 23; ///gpr[23]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[24], dut.GPR[23],dut.`isrc);
+      
+      #10;  
+      
+      //// bitwise nor with register
+      dut.IR = 0;
+      dut.`op_code = 10; 
+      dut.`rdst    = 27; ///gpr[27]
+      dut.`rsrc1   = 25; ///gpr[25]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 26; ///gpr[26]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--Rsrc2:%b",dut.`op_code, dut.GPR[27], dut.GPR[25], dut.GPR[26]);
+      
+      #10;
+      
+      //// bitwise nor with imm data
+      dut.IR = 0;
+      dut.`op_code = 10; 
+      dut.`rdst    = 29; ///gpr[29]
+      dut.`rsrc1   = 28; ///gpr[28]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b--imm:%b",dut.`op_code, dut.GPR[29], dut.GPR[28],dut.`isrc);
+      
+      #10;
+      
+      //// bitwise not with register
+      dut.IR = 0;
+      dut.`op_code = 11; 
+      dut.`rdst    = 31; ///gpr[31]
+      dut.`rsrc1   = 30; ///gpr[30]
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 0; ///imm=0
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--Rsrc1:%b",dut.`op_code, dut.GPR[31], dut.GPR[30]);
+      
+      #10;
+      
+      //// bitwise not with imm data
+      dut.IR = 0;
+      dut.`op_code = 11; 
+      dut.`rdst    = 31; ///gpr[31] --using same register (because size over)
+      dut.`rsrc1   = 0; ///gpr[0]
+      dut.`imm_mod = 1;
+      dut.`rsrc2   = 0; ///gpr[0]
+      dut.`isrc    = 10; ///imm=10
+      #10;
+      $display("IR : %b",dut.IR);
+      $display("op_code:%b--Rdest:%b--imm:%b",dut.`op_code, dut.GPR[31], dut.`isrc);
+      
+      #10;
+      
+      for(i=0; i<32; i=i+1)
+        begin
+          $display("GPR[%d]: %d", i,dut.GPR[i]);
+        end
+    end
+  
+endmodule
