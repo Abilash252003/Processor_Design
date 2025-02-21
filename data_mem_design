@@ -1,0 +1,218 @@
+`timescale 1ns / 1ps
+
+`define op_code IR[31:27]
+`define rdst    IR [26:22]
+`define rsrc1   IR [21:17]
+`define imm_mod IR [16]
+`define rsrc2   IR [15:11]
+`define isrc    IR [15:0]
+
+`define movsgpr 5'b00000
+`define mov     5'b00001
+`define add     5'b00010
+`define sub     5'b00011
+`define mul     5'b00100
+
+`define bor     5'b00101
+`define band    5'b00110
+`define bxor    5'b00111
+`define bxnor   5'b01000
+`define bnand   5'b01001
+`define bnor    5'b01010
+`define bnot    5'b01011
+
+`define gpr_mem 5'b01100    //GPR to data memory (storing the res)  (Gdst to data_mem)
+`define mem_gpr 5'b01101    //data memory to GPR (loading the data) (data_mem to Gsrc1)
+`define ext_mem 5'b01110    //external data to data memory (din to data mem)
+`define mem_ext 5'b01111    //data memory to external world(data mem to dout)
+`define ext_gpr 5'b10000    //external data to GPR (din to Gsrc1)
+`define gpr_ext 5'b10001    //GPR to external data (Gdst to dout)
+
+
+module data_memory();
+  
+  reg [31:0]IR;         //1 IR 32 bit length
+  reg [15:0]sgpr;       //1 SGPR 16 bit length
+  reg [15:0] GPR[31:0]; //32 GPR, each 16 bit lengths
+  reg [31:0]mul_temp;
+  
+  reg sign_flag, carry_flag, zero_flag, overflow_flag;
+  reg [16:0]sum_temp;
+  
+  reg [15:0] data_mem[65535:0];  //65536 slot each can store 16 bits (isrc used to rep)
+  reg [15:0]din;
+  reg [15:0]dout;
+
+  always @ (*)
+    begin
+      case(`op_code)
+        
+        `movsgpr: begin
+          GPR[`rdst] = sgpr;
+        end
+        
+        `mov : begin
+          if(`imm_mod)
+            GPR[`rdst]  = `isrc;
+          else
+            GPR[`rdst]   = GPR[`rsrc1];
+        end
+        
+        `add    : begin
+          if(`imm_mod)
+            GPR[`rdst] = GPR[`rsrc1] + `isrc;
+          else
+            GPR[`rdst] = GPR[`rsrc1] + GPR[`rsrc2];
+        end
+        
+        `sub    : begin
+          if(`imm_mod)
+            GPR[`rdst] = GPR[`rsrc1] - `isrc;
+          else
+            GPR[`rdst] = GPR[`rsrc1] - GPR[`rsrc2];
+        end
+        
+         `mul    : begin
+           if(`imm_mod)
+             mul_temp   = GPR[`rsrc1] * `isrc;
+           else
+             mul_temp   = GPR[`rsrc1] * GPR[`rsrc2];
+           GPR[`rdst]  = mul_temp[15:0];
+           sgpr        = mul_temp[31:16];
+        end
+        
+        `bor   : begin
+          if(`imm_mod)
+            GPR[`rdst] = GPR[`rsrc1] | `isrc;
+          else
+            GPR[`rdst] = GPR[`rsrc1] | GPR[`rsrc2];
+        end
+        
+        `band   : begin
+          if(`imm_mod)
+            GPR[`rdst] = GPR[`rsrc1] & `isrc;
+          else
+            GPR[`rdst] = GPR[`rsrc1] & GPR[`rsrc2];
+        end        
+     
+        `bxor   : begin
+          if(`imm_mod)
+            GPR[`rdst] = GPR[`rsrc1] ^ `isrc;
+          else
+            GPR[`rdst] = GPR[`rsrc1] ^ GPR[`rsrc2];
+        end   
+
+        `bxnor   : begin
+          if(`imm_mod)
+            GPR[`rdst] = ~(GPR[`rsrc1] ^ `isrc);
+          else
+            GPR[`rdst] = ~(GPR[`rsrc1] ^ GPR[`rsrc2]);
+        end    
+        
+        `bnand   : begin
+          if(`imm_mod)
+            GPR[`rdst] = ~(GPR[`rsrc1] & `isrc);
+          else
+            GPR[`rdst] = ~(GPR[`rsrc1] & GPR[`rsrc2]);
+        end    
+        
+        `bnor   : begin
+          if(`imm_mod)
+            GPR[`rdst] = ~(GPR[`rsrc1] | `isrc);
+          else
+            GPR[`rdst] = ~(GPR[`rsrc1] | GPR[`rsrc2]);
+        end    
+        
+        `bnot   : begin
+          if(`imm_mod)
+            GPR[`rdst] = ~(`isrc);
+          else
+            GPR[`rdst] = ~(GPR[`rsrc1]);
+        end
+        
+        `gpr_mem : begin
+          data_mem[`isrc] = GPR[`rdst];
+        end
+        
+        `mem_gpr : begin
+          GPR[`rsrc1]     = data_mem[`isrc];
+        end
+        
+        `ext_mem : begin
+          data_mem[`isrc] = din;
+        end
+        
+        `mem_ext : begin
+          dout            = data_mem[`isrc];
+        end
+        
+        `ext_gpr : begin
+          GPR[`rsrc1]     = din;
+        end
+        
+        `gpr_ext : begin
+          dout            = GPR[`rdst];
+        end
+        
+      endcase
+    end
+  
+  always @ (*)
+    begin
+      
+      if(`op_code==`add)
+        begin
+          if(`imm_mod)
+            sum_temp = GPR[`rsrc1] + `isrc;
+          else
+            sum_temp = GPR[`rsrc1] + GPR[`rsrc2];
+          carry_flag = sum_temp[16];
+        end
+      else
+        begin
+          carry_flag = 1'b0;
+        end
+      
+      
+      if(`op_code==`mul)
+        sign_flag = sgpr[15];
+      else
+        sign_flag = GPR[`rdst][15];
+      
+      
+      if(`op_code==`mul)
+        zero_flag = ~((|sgpr) | (|GPR[`rdst]));
+      else
+        zero_flag = ~(|GPR[`rdst]);
+      
+      
+      if(`op_code==`add)
+        begin
+          if(`imm_mod)
+            begin
+              overflow_flag = ((~GPR[`rsrc1][15] & ~IR[15] & GPR[`rdst][15]) | (GPR[`rsrc1][15] & IR[15] & ~GPR[`rdst][15]));
+            end
+          else
+            begin
+              overflow_flag = ((~GPR[`rsrc1][15] & ~GPR[`rsrc2][15] & GPR[`rdst][15]) | (GPR[`rsrc1][15] & GPR[`rsrc2][15] & ~GPR[`rdst][15]));
+            end
+        end
+      else if(`op_code==`sub)
+        begin
+          if(`imm_mod)
+            begin
+              overflow_flag = ((~GPR[`rsrc1][15] & IR[15] & GPR[`rdst][15]) | (GPR[`rsrc1][15] & ~IR[15] & ~GPR[`rdst][15]));
+            end
+          else
+            begin
+              overflow_flag = ((~GPR[`rsrc1][15] & GPR[`rsrc2][15] & GPR[`rdst][15]) | (GPR[`rsrc1][15] & ~GPR[`rsrc2][15] & ~GPR[`rdst][15]));
+            end
+        end
+      else
+        begin
+          overflow_flag = 1'b0;
+        end
+    end
+  
+endmodule
+  
