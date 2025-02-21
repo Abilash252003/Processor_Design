@@ -1,0 +1,140 @@
+module tb();
+  data_memory dut();
+  
+  integer i;
+  
+  task GPR_initialize();
+    for(i=0; i<32; i=i+1)
+      begin
+        dut.GPR[i] = 5;
+      end
+  endtask
+  
+  task display_gpr();
+    for(i=0; i<32; i=i+1)
+      begin
+        $display("GPR[%d]: %d", i,dut.GPR[i]);
+      end
+  endtask
+  
+  task data_mem_initialize();
+    for(i=0; i<65536; i=i+1)
+      begin
+        dut.data_mem[i] = 10;
+      end
+  endtask
+  
+  task display_data_mem();
+    for(i=0; i<16; i=i+1)
+      begin
+        $display("data_mem[%d]: %d", i,dut.data_mem[i]);
+      end
+  endtask
+  
+  initial 
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+
+  initial
+    begin
+      GPR_initialize();
+      #10;
+      display_gpr();
+      #10;
+      data_mem_initialize();
+      #10;
+      display_data_mem();
+      #10;
+      
+      ///Sending data from GPR_dest to data memory (store)
+      dut.IR = 0;
+      dut.`op_code = 12;
+      dut.`rdst    = 2;
+      dut.`rsrc1   = 0;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 4;
+      #10;
+      $display("Op_code:%b----GPR[%d]:%b---Data[%d]:%b",dut.`op_code, dut.`rdst,dut.GPR[dut.`rdst],dut.`isrc,dut.data_mem[dut.`isrc]);
+      
+      #10;
+      
+      ///Sending data from data memory to GPR (load)
+      dut.IR = 0;
+      dut.`op_code = 13;
+      dut.`rdst    = 0;
+      dut.`rsrc1   = 4;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 65535;
+      #10;
+      $display("Op_code:%b----GPR[%d]:%b---Data[%d]:%b",dut.`op_code, dut.`rsrc1,dut.GPR[dut.`rsrc1],dut.`isrc,dut.data_mem[dut.`isrc]);
+      
+      #10;
+      
+      ///Sending data from ext_data(din) to data memory 
+      dut.IR  = 0;
+      dut.din = 20;
+      dut.`op_code = 14;
+      dut.`rdst    = 0;
+      dut.`rsrc1   = 0;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 8;
+      #10;
+      $display("Op_code:%b----din:%b---Data[%d]:%b",dut.`op_code, dut.din,dut.`isrc,dut.data_mem[dut.`isrc]);
+      
+      #10
+      
+      ///Sending data from data memory to external data(dout)
+      dut.IR = 0;
+      dut.dout = 0;
+      dut.`op_code = 15;
+      dut.`rdst    = 0;
+      dut.`rsrc1   = 0;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 65530;
+      #10;
+      $display("Op_code:%b---dout:%b---Data[%d]:%b",dut.`op_code, dut.dout,dut.`isrc,dut.data_mem[dut.`isrc]);
+      
+      #10;
+      
+      ///Sending data from external data(din) to GPR 
+      dut.IR = 0;
+      dut.din=65535;
+      dut.`op_code = 16;
+      dut.`rdst    = 0;
+      dut.`rsrc1   = 6;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 0;
+      #10;
+      $display("Op_code:%b----GPR[%d]:%b---din:%b",dut.`op_code, dut.`rsrc1,dut.GPR[dut.`rsrc1],dut.din);
+      
+      #10;
+      
+      ///Sending data from GPR_dest to external dout
+      dut.IR = 0;
+      dut.dout =0;
+      dut.`op_code = 17;
+      dut.`rdst    = 8;
+      dut.`rsrc1   = 0;
+      dut.`imm_mod = 0;
+      dut.`rsrc2   = 0;
+      dut.`isrc    = 0;
+      #10;
+      $display("Op_code:%b----GPR[%d]:%b---dout:%b",dut.`op_code, dut.`rdst,dut.GPR[dut.`rdst],dut.dout);
+      
+      #10;
+      
+      display_gpr();
+      #10;
+      
+      display_data_mem();
+      #10;
+    end
+  
+endmodule
