@@ -1,0 +1,43 @@
+module tb();
+  reg clk, rst;
+  reg [31:0]insta_mem[15:0];
+  wire [31:0]IR;
+  
+  Insta_mem dut(.clk(clk), .rst(rst), .insta_mem(insta_mem), .IR(IR));
+  
+  integer i;
+  
+  initial
+    begin
+      clk = 1'b1;
+      forever #5 clk = ~clk;
+    end
+  
+  initial 
+    begin
+      //for(i=0; i<16; i=i+1)
+        //begin
+          //insta_mem[i] = i + 5;
+        //end
+      $readmemb("instruc_mem.txt",insta_mem);
+    end
+  
+    initial 
+    begin
+      $dumpfile("dump.vcd");
+      $dumpvars;
+    end
+  
+  initial
+    begin
+      rst = 1;
+      #10;
+      rst = 0;
+      #1500;
+      $finish;
+    end
+  
+  initial
+    $monitor("IR : %b",IR);
+ 
+endmodule
