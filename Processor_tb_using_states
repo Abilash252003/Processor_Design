@@ -46,8 +46,9 @@ module tb();
     dut.inst_mem[5] = 32'b 10011_00000_00000_1_11111_11111111011;  //jc
     
     dut.inst_mem[65532] = 32'b 00010_00100_00011_1_00000_00000000001; //inc
-    dut.inst_mem[65533] = 32'b 11011_00000_00000_0_00000_00000000000; //last instruction
+    dut.inst_mem[65533] = 32'b 11011_00000_00000_0_00000_00000000000; //last
     
+    dut.inst_mem[65534] = 32'b 10001_00111_00000_0_00000_00000000000;
   endtask
   
   task display_insta_mem();
@@ -81,8 +82,11 @@ module tb();
       rst = 1'b1;
       #10;
       rst = 1'b0;
-      #1000;
-     
+      #1200;
+      
+      dut.stop_flag = 1'b0;
+      #500;
+      
       display_gpr();
       display_data_mem();
       $stop;
