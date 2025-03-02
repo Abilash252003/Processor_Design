@@ -293,12 +293,12 @@ module processor_design(clk, rst, din, dout);
   
   reg [3:0]state, next_state;
   
-  parameter idle= 4'b0000;
-  parameter instr= 4'b0001;
-  parameter execute= 4'b0010;
-  parameter delay=4'b0011;
-  parameter next_in= 4'b0100;
-  parameter halt   = 4'b0101;
+  parameter idle    = 4'b0000;
+  parameter instr   = 4'b0001;
+  parameter execute = 4'b0010;
+  parameter delay   = 4'b0011;
+  parameter next_in = 4'b0100;
+  parameter halt    = 4'b0101;
   
   always @ (posedge clk)
     begin
